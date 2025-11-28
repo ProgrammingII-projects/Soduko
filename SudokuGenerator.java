@@ -116,6 +116,15 @@ public class SudokuGenerator {
         return true;
     }
 
+    // Get a copy of the current board
+    public int[][] getBoard() {
+        int[][] copy = new int[size][size];
+        for (int r = 0; r < size; r++) {
+            copy[r] = board[r].clone();
+        }
+        return copy;
+    }
+
     // Print the Sudoku board
     public void printBoard() {
         for (int r = 0; r < size; r++) {
