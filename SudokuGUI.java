@@ -1,5 +1,8 @@
 import javax.swing.*;
 import javax.swing.border.LineBorder;
+
+import model.Sudoku;
+
 import java.awt.*;
 
 public class SudokuGUI extends JFrame {
@@ -22,7 +25,7 @@ public class SudokuGUI extends JFrame {
         setLayout(new BorderLayout());
 
        
-        SudokuGenerator sg = new SudokuGenerator(SIZE);
+        Sudoku sg = new Sudoku(SIZE);
         solution = sg.getBoard(); 
         sg.generatePuzzle(40, 1); 
         puzzle = sg.getBoard(); 

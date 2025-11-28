@@ -1,13 +1,14 @@
+package model;
 
 import java.util.Random;
 
-public class SudokuGenerator {
+public class Sudoku {
     private int[][] board;
     private int size;
     private int boxSize;
     private Random rand = new Random();
 
-    public SudokuGenerator(int size) {
+    public Sudoku(int size) {
         this.size = size;
         double sqrt = Math.sqrt(size);
         if (sqrt - Math.floor(sqrt) != 0) {
@@ -96,7 +97,7 @@ public class SudokuGenerator {
     }
 
     // Check if it's safe to place num at (i, j)
-    private boolean isSafe(int i, int j, int num) {
+    public boolean isSafe(int i, int j, int num) {
         return isUnusedInRow(i, num) &&
                isUnusedInCol(j, num) &&
                isUnusedInBox(i - i % boxSize, j - j % boxSize, num);
@@ -116,15 +117,6 @@ public class SudokuGenerator {
         return true;
     }
 
-    // Get a copy of the current board
-    public int[][] getBoard() {
-        int[][] copy = new int[size][size];
-        for (int r = 0; r < size; r++) {
-            copy[r] = board[r].clone();
-        }
-        return copy;
-    }
-
     // Print the Sudoku board
     public void printBoard() {
         for (int r = 0; r < size; r++) {
@@ -135,6 +127,15 @@ public class SudokuGenerator {
             System.out.println();
         }
         System.out.println();
+    }
+
+     // Get a copy of the current board
+     public int[][] getBoard() {
+        int[][] copy = new int[size][size];
+        for (int r = 0; r < size; r++) {
+            copy[r] = board[r].clone();
+        }
+        return copy;
     }
 
     // Generate a Sudoku puzzle by deleting cells so it has up to maxSolutionsAllowed solutions
