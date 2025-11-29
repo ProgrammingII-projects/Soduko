@@ -24,7 +24,7 @@ public class SudokuGUI extends JFrame {
        
         SudokuGenerator sg = new SudokuGenerator(SIZE);
         solution = sg.getBoard(); 
-        sg.generatePuzzle(40, 1); 
+        sg.generatePuzzle(20, 1); 
         puzzle = sg.getBoard(); 
 
    
