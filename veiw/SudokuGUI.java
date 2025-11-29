@@ -1,5 +1,9 @@
+package veiw;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
+
+import utils.SudokuGenerator;
+
 import java.awt.*;
 
 public class SudokuGUI extends JFrame {

@@ -1,3 +1,7 @@
+import model.SudokuModel;
+import services.SudokuService;
+import veiw.SudokuView;
+
 public class SudokuController {
     private SudokuModel model;
     private SudokuView view;
@@ -31,41 +35,35 @@ public class SudokuController {
     }
 
     private void handleCellSelection(int row, int col) {
-        if (model.isFixed(row, col) || model.isCorrect(row, col)) {
-            return;
-        }
-
         // Unhighlight previous selection
         if (model.hasSelection()) {
             view.unhighlightCell(model.getSelectedRow(), model.getSelectedCol());
         }
 
-        // Set new selection
-        model.setSelectedCell(row, col);
-        view.highlightCell(row, col);
+        // Use service to validate and select cell
+        if (service.selectCell(model, row, col)) {
+            view.highlightCell(row, col);
+        }
     }
 
     private void handleNumberPlacement(int number) {
-        if (!model.hasSelection()) {
-            view.showMessage("Please select a cell first!", "No Cell Selected");
-            return;
-        }
-
-        int row = model.getSelectedRow();
-        int col = model.getSelectedCol();
-
-        if (model.isFixed(row, col)) {
-            return;
-        }
-
         // Make the move through service
-        service.makeMove(model, row, col, number);
+        SudokuService.MoveResult result = service.makeMove(model, number);
 
-        // Update view
-        boolean isCorrect = model.isCorrect(row, col);
-        view.updateCell(row, col, number, false, isCorrect);
+        // Handle result
+        if (!result.isMoveMade()) {
+            if (result.getErrorMessage() != null) {
+                view.showMessage(result.getErrorMessage(), "Invalid Move");
+            }
+            return;
+        }
 
-        if (isCorrect) {
+        // Update view based on service result
+        int row = result.getRow();
+        int col = result.getCol();
+        view.updateCell(row, col, number, false, result.isCorrect());
+
+        if (result.isCorrect()) {
             // Cell is now correct, unhighlight it
             view.unhighlightCell(row, col);
         }

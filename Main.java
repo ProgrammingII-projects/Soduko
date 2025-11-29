@@ -1,5 +1,10 @@
 import javax.swing.SwingUtilities;
 
+import controller.SudokuController;
+import model.SudokuModel;
+import services.SudokuService;
+import veiw.SudokuView;
+
 public class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

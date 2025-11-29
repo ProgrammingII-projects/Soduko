@@ -1,3 +1,4 @@
+package model;
 public class SudokuModel {
     private static final int SIZE = 9;
     private int[][] solution;
