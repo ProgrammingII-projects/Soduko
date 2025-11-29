@@ -2,7 +2,9 @@ package veiw;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 
-import utils.SudokuGenerator;
+import controller.SudokuController;
+import model.SudokuModel;
+import services.SudokuService;
 
 import java.awt.*;
 
@@ -11,13 +13,11 @@ public class SudokuGUI extends JFrame {
     private JButton[][] cells = new JButton[SIZE][SIZE];
     private JButton[] numberButtons = new JButton[9];
     private JButton selectedCell = null;
-    private int[][] solution;
-    private int[][] puzzle;
-    private int errorCount = 0;
     private JLabel errorLabel;
-    private boolean[][] isFixed = new boolean[SIZE][SIZE];
-    private boolean[][] isCorrect = new boolean[SIZE][SIZE];
     private javax.swing.border.Border[][] originalBorders = new javax.swing.border.Border[SIZE][SIZE];
+    private SudokuModel model;
+    private SudokuService service;
+    private SudokuController controller;
 
     public SudokuGUI() {
         setTitle("Sudoku Game");
@@ -25,18 +25,10 @@ public class SudokuGUI extends JFrame {
         setSize(700, 800);
         setLayout(new BorderLayout());
 
-       
-        SudokuGenerator sg = new SudokuGenerator(SIZE);
-        solution = sg.getBoard(); 
-        sg.generatePuzzle(20, 1); 
-        puzzle = sg.getBoard(); 
-
-   
-        for (int r = 0; r < SIZE; r++) {
-            for (int c = 0; c < SIZE; c++) {
-                isFixed[r][c] = (puzzle[r][c] != 0);
-            }
-        }
+        // Initialize service and model
+        service = new SudokuService();
+        model = service.generateNewPuzzle(50);
+        controller = new SudokuController(model, null, service);
 
      
         JPanel topPanel = new JPanel(new FlowLayout());
@@ -74,15 +66,16 @@ public class SudokuGUI extends JFrame {
                
                 final int row = r;
                 final int col = c;
-                if (puzzle[r][c] != 0) {
-                    cell.setText(String.valueOf(puzzle[r][c]));
+                int value = model.getCellValue(r, c);
+                if (value != 0) {
+                    cell.setText(String.valueOf(value));
                     cell.setBackground(new Color(240, 240, 240)); // Light gray 
                     cell.setEnabled(false);
                 } else {
                     cell.setBackground(Color.WHITE);
                 }
                
-                if (!isFixed[row][col]) {
+                if (!model.isFixed(row, col)) {
                     cell.addActionListener(e -> selectCell(cell, row, col));
                 }
 
@@ -113,8 +106,8 @@ public class SudokuGUI extends JFrame {
     }
 
     private void selectCell(JButton cell, int row, int col) {
-        
-        if (isFixed[row][col] || isCorrect[row][col]) {
+        // Use service to check if cell can be selected
+        if (!service.canSelectCell(model, row, col)) {
             return;
         }
 
@@ -149,7 +142,7 @@ public class SudokuGUI extends JFrame {
             return;
         }
 
-       
+        // Find the selected cell coordinates
         int row = -1, col = -1;
         for (int r = 0; r < SIZE; r++) {
             for (int c = 0; c < SIZE; c++) {
@@ -162,32 +155,37 @@ public class SudokuGUI extends JFrame {
             if (row != -1) break;
         }
 
-        if (row == -1 || col == -1 || isFixed[row][col]) {
+        if (row == -1 || col == -1 || model.isFixed(row, col)) {
             return;
         }
 
-       
-        selectedCell.setText(String.valueOf(number));
-        puzzle[row][col] = number;
+        // Set selection in model if not already set
+        if (!model.hasSelection()) {
+            model.setSelectedCell(row, col);
+        }
 
-       
-        boolean correct = (number == solution[row][col]);
+        // Use service to make the move (validates row/column/box constraints)
+        SudokuService.MoveResult result = service.makeMove(model, number);
+
+        // Update UI
+        selectedCell.setText(String.valueOf(number));
         
-        if (correct) {
+        // Determine if the move is valid (satisfies all constraints)
+        boolean isValid = result.isCorrect();
+
+        if (isValid) {
+            // Valid move (no duplicates in row/column/box)
             selectedCell.setBackground(new Color(144, 238, 144)); // Light green
-         
-            isCorrect[row][col] = true;
-            selectedCell.setEnabled(false);
-            
             selectedCell.setBorder(originalBorders[row][col]);
             selectedCell = null;
+            model.clearSelection();
         } else {
-            selectedCell.setBackground(new Color(255, 150, 150)); // Light red 
-         
-            errorCount++;
-            errorLabel.setText("Errors: " + errorCount);
-         
+            // Invalid move (duplicates in row/column/box)
+            selectedCell.setBackground(new Color(255, 150, 150)); // Light red
         }
+
+        // Update error count display
+        errorLabel.setText("Errors: " + model.getErrorCount());
     }
 }
 

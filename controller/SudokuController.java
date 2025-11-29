@@ -1,3 +1,5 @@
+package controller;
+
 import model.SudokuModel;
 import services.SudokuService;
 import veiw.SudokuView;
@@ -63,13 +65,23 @@ public class SudokuController {
         int col = result.getCol();
         view.updateCell(row, col, number, false, result.isCorrect());
 
-        if (result.isCorrect()) {
-            // Cell is now correct, unhighlight it
-            view.unhighlightCell(row, col);
-        }
-
         // Update error count display
         view.updateErrorCount(model.getErrorCount());
+    }
+
+    // Controller method for checking if the number occurs at most once in the given row
+    public boolean checkRow(int row, int number) {
+        return service.checkRow(model, row, number);
+    }
+
+    // Controller method for checking if the number occurs at most once in the given column
+    public boolean checkColumn(int col, int number) {
+        return service.checkColumn(model, col, number);
+    }
+
+    // Controller method for checking if the number occurs at most once in the 3x3 box containing (row, col)
+    public boolean checkBox(int row, int col, int number) {
+        return service.checkBox(model, row, col, number);
     }
 }
 

@@ -1,18 +1,17 @@
+package services;
+
 import model.SudokuModel;
 import utils.SudokuGenerator;
 
-package services;
 public class SudokuService {
     private static final int SIZE = 9;
 
     public SudokuModel generateNewPuzzle(int cellsToRemove) {
         SudokuGenerator generator = new SudokuGenerator(SIZE);
-        int[][] solution = generator.getBoard();
         generator.generatePuzzle(cellsToRemove, 1);
         int[][] puzzle = generator.getBoard();
 
         SudokuModel model = new SudokuModel();
-        model.setSolution(solution);
         model.setPuzzle(puzzle);
 
         // Mark fixed cells
@@ -25,8 +24,51 @@ public class SudokuService {
         return model;
     }
 
+    // Check if a number is NOT repeated in the given row
+    public boolean checkRow(SudokuModel model, int row, int number) {
+        int[][] puzzle = model.getPuzzle();
+        int count = 0;
+        for (int c = 0; c < SIZE; c++) {
+            if (puzzle[row][c] == number) {
+                count++;
+            }
+        }
+        // Valid if the number occurs at most once
+        return count <= 1;
+    }
+
+    // Check if a number is NOT repeated in the given column
+    public boolean checkColumn(SudokuModel model, int col, int number) {
+        int[][] puzzle = model.getPuzzle();
+        int count = 0;
+        for (int r = 0; r < SIZE; r++) {
+            if (puzzle[r][col] == number) {
+                count++;
+            }
+        }
+        // Valid if the number occurs at most once
+        return count <= 1;
+    }
+
+    // Check if a number is NOT repeated in the 3x3 box containing (row, col)
+    public boolean checkBox(SudokuModel model, int row, int col, int number) {
+        int[][] puzzle = model.getPuzzle();
+        int boxStartRow = (row / 3) * 3;
+        int boxStartCol = (col / 3) * 3;
+        int count = 0;
+        for (int r = 0; r < 3; r++) {
+            for (int c = 0; c < 3; c++) {
+                if (puzzle[boxStartRow + r][boxStartCol + c] == number) {
+                    count++;
+                }
+            }
+        }
+        // Valid if the number occurs at most once in the box
+        return count <= 1;
+    }
+
     public boolean canSelectCell(SudokuModel model, int row, int col) {
-        return !model.isFixed(row, col) && !model.isCorrect(row, col);
+        return !model.isFixed(row, col);
     }
 
     public boolean selectCell(SudokuModel model, int row, int col) {
@@ -37,9 +79,11 @@ public class SudokuService {
         return true;
     }
 
-    public boolean validateMove(SudokuModel model, int row, int col, int number) {
-        int[][] solution = model.getSolution();
-        return number == solution[row][col];
+    public boolean isValidMove(SudokuModel model, int row, int col, int number) {
+        // Check if the move satisfies all Sudoku constraints
+        return checkRow(model, row, number) && 
+               checkColumn(model, col, number) && 
+               checkBox(model, row, col, number);
     }
 
     public MoveResult makeMove(SudokuModel model, int number) {
@@ -54,21 +98,21 @@ public class SudokuService {
             return new MoveResult(false, false, "Cannot modify fixed cell", row, col);
         }
 
-        if (model.isCorrect(row, col)) {
-            return new MoveResult(false, false, "Cell is already correct", row, col);
-        }
-
+        // Set the new value
         model.setCellValue(row, col, number);
-        boolean isCorrect = validateMove(model, row, col, number);
+        
+        // Check if the move is valid (satisfies row, column, and box constraints)
+        boolean isValid = isValidMove(model, row, col, number);
+        
+        // Update correctness status based on constraints
+        model.setCorrect(row, col, isValid);
 
-        if (isCorrect) {
-            model.setCorrect(row, col, true);
-            model.clearSelection();
-            return new MoveResult(true, true, null, row, col);
-        } else {
+        // Increment error count only when constraints are violated
+        if (!isValid) {
             model.incrementErrorCount();
-            return new MoveResult(true, false, null, row, col);
         }
+
+        return new MoveResult(true, isValid, null, row, col);
     }
 
     public static class MoveResult {

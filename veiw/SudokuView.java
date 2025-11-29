@@ -110,7 +110,7 @@ public class SudokuView extends JFrame {
             cell.setEnabled(false);
         } else if (isCorrect) {
             cell.setBackground(new Color(144, 238, 144));
-            cell.setEnabled(false);
+            cell.setEnabled(true); // Keep cells enabled even when correct
         } else {
             cell.setBackground(Color.WHITE);
             cell.setEnabled(true);
