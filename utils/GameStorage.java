@@ -22,21 +22,21 @@ public class GameStorage {
     private static final String GAME_FILE_PREFIX = "game_";
     private static final String GAME_FILE_EXTENSION = ".txt";
     private static final String LOG_FILE_NAME = "game_log.txt";
-    
+
     private final String basePath;
-    
+
     private GameStorage() {
         this.basePath = "games";
         initializeFolders();
     }
-    
+
     public static synchronized GameStorage getInstance() {
         if (instance == null) {
             instance = new GameStorage();
         }
         return instance;
     }
-    
+
     /**
      * Initialize all required folders
      */
@@ -51,7 +51,7 @@ public class GameStorage {
             System.err.println("Error creating folders: " + e.getMessage());
         }
     }
-    
+
     /**
      * Save a game to a difficulty folder
      */
@@ -61,48 +61,48 @@ public class GameStorage {
         Path filePath = Paths.get(basePath, folder, filename);
         saveGameToFile(filePath, game);
     }
-    
+
     /**
      * Save the current game being played
      */
     public void saveCurrentGame(Game game) throws IOException {
         Path filePath = Paths.get(basePath, CURRENT_FOLDER, "current_game" + GAME_FILE_EXTENSION);
         saveGameToFile(filePath, game);
-        
+
         // Also save to incomplete folder
         Path incompleteGamePath = Paths.get(basePath, INCOMPLETE_FOLDER, "current_game" + GAME_FILE_EXTENSION);
         saveGameToFile(incompleteGamePath, game);
     }
-    
+
     /**
      * Load a random game from a difficulty folder
      */
     public Game loadRandomGame(DifficultyEnum difficulty) throws IOException, exceptions.NotFoundException {
         String folder = getFolderName(difficulty);
         Path folderPath = Paths.get(basePath, folder);
-        
+
         if (!Files.exists(folderPath)) {
             throw new exceptions.NotFoundException("Folder does not exist: " + folder);
         }
-        
+
         List<Path> gameFiles = new ArrayList<>();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(folderPath, 
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(folderPath,
                 path -> path.toString().endsWith(GAME_FILE_EXTENSION))) {
             for (Path entry : stream) {
                 gameFiles.add(entry);
             }
         }
-        
+
         if (gameFiles.isEmpty()) {
             throw new exceptions.NotFoundException("No games found for difficulty: " + difficulty);
         }
-        
+
         // Pick a random file
         Random random = new Random();
         Path selectedFile = gameFiles.get(random.nextInt(gameFiles.size()));
         return loadGameFromFile(selectedFile);
     }
-    
+
     /**
      * Load the current game if it exists
      */
@@ -113,7 +113,7 @@ public class GameStorage {
         }
         return loadGameFromFile(filePath);
     }
-    
+
     /**
      * Check if current game exists
      */
@@ -121,24 +121,24 @@ public class GameStorage {
         Path filePath = Paths.get(basePath, INCOMPLETE_FOLDER, "current_game" + GAME_FILE_EXTENSION);
         return Files.exists(filePath);
     }
-    
+
     /**
      * Check if at least one game exists for each difficulty
      */
     public boolean hasAllDifficultyGames() {
-        return hasGamesInFolder(EASY_FOLDER) && 
-               hasGamesInFolder(MEDIUM_FOLDER) && 
-               hasGamesInFolder(HARD_FOLDER);
+        return hasGamesInFolder(EASY_FOLDER) &&
+                hasGamesInFolder(MEDIUM_FOLDER) &&
+                hasGamesInFolder(HARD_FOLDER);
     }
-    
+
     /**
      * Delete a game from a difficulty folder
      */
     public void deleteGame(DifficultyEnum difficulty, Game game) throws IOException {
         String folder = getFolderName(difficulty);
         Path folderPath = Paths.get(basePath, folder);
-        
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(folderPath, 
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(folderPath,
                 path -> path.toString().endsWith(GAME_FILE_EXTENSION))) {
             for (Path file : stream) {
                 Game fileGame = loadGameFromFile(file);
@@ -149,40 +149,40 @@ public class GameStorage {
             }
         }
     }
-    
+
     /**
      * Delete the current game and log file
      */
     public void deleteCurrentGame() throws IOException {
         Path gamePath = Paths.get(basePath, INCOMPLETE_FOLDER, "current_game" + GAME_FILE_EXTENSION);
         Path logPath = Paths.get(basePath, INCOMPLETE_FOLDER, LOG_FILE_NAME);
-        
+
         if (Files.exists(gamePath)) {
             Files.delete(gamePath);
         }
         if (Files.exists(logPath)) {
             Files.delete(logPath);
         }
-        
+
         // Also delete from current folder
         Path currentPath = Paths.get(basePath, CURRENT_FOLDER, "current_game" + GAME_FILE_EXTENSION);
         if (Files.exists(currentPath)) {
             Files.delete(currentPath);
         }
     }
-    
+
     /**
      * Append to log file
      */
     public void appendToLog(String logEntry) throws IOException {
         Path logPath = Paths.get(basePath, INCOMPLETE_FOLDER, LOG_FILE_NAME);
-        try (BufferedWriter writer = Files.newBufferedWriter(logPath, 
+        try (BufferedWriter writer = Files.newBufferedWriter(logPath,
                 StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
             writer.write(logEntry);
             writer.newLine();
         }
     }
-    
+
     /**
      * Read all log entries
      */
@@ -191,17 +191,20 @@ public class GameStorage {
         if (!Files.exists(logPath)) {
             return new ArrayList<>();
         }
-        
+
         List<String> entries = new ArrayList<>();
         try (BufferedReader reader = Files.newBufferedReader(logPath)) {
             String line;
             while ((line = reader.readLine()) != null) {
-                entries.add(line.trim());
+                String trimmed = line.trim();
+                if (!trimmed.isEmpty()) {
+                    entries.add(trimmed);
+                }
             }
         }
         return entries;
     }
-    
+
     /**
      * Remove last log entry
      */
@@ -210,11 +213,11 @@ public class GameStorage {
         if (entries.isEmpty()) {
             return;
         }
-        
+
         entries.remove(entries.size() - 1);
-        
+
         Path logPath = Paths.get(basePath, INCOMPLETE_FOLDER, LOG_FILE_NAME);
-        try (BufferedWriter writer = Files.newBufferedWriter(logPath, 
+        try (BufferedWriter writer = Files.newBufferedWriter(logPath,
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
             for (String entry : entries) {
                 writer.write(entry);
@@ -222,7 +225,7 @@ public class GameStorage {
             }
         }
     }
-    
+
     /**
      * Save game board to file
      */
@@ -240,7 +243,7 @@ public class GameStorage {
             }
         }
     }
-    
+
     /**
      * Load game board from file
      */
@@ -257,11 +260,11 @@ public class GameStorage {
                 rows.add(row);
             }
         }
-        
+
         int[][] board = rows.toArray(new int[rows.size()][]);
         return new Game(board);
     }
-    
+
     /**
      * Check if folder has at least one game file
      */
@@ -270,25 +273,28 @@ public class GameStorage {
         if (!Files.exists(folderPath)) {
             return false;
         }
-        
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(folderPath, 
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(folderPath,
                 path -> path.toString().endsWith(GAME_FILE_EXTENSION))) {
             return stream.iterator().hasNext();
         } catch (IOException e) {
             return false;
         }
     }
-    
+
     /**
      * Get folder name for difficulty
      */
     private String getFolderName(DifficultyEnum difficulty) {
         switch (difficulty) {
-            case EASY: return EASY_FOLDER;
-            case MEDIUM: return MEDIUM_FOLDER;
-            case HARD: return HARD_FOLDER;
-            default: throw new IllegalArgumentException("Unknown difficulty: " + difficulty);
+            case EASY:
+                return EASY_FOLDER;
+            case MEDIUM:
+                return MEDIUM_FOLDER;
+            case HARD:
+                return HARD_FOLDER;
+            default:
+                throw new IllegalArgumentException("Unknown difficulty: " + difficulty);
         }
     }
 }
-
