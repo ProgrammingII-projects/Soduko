@@ -33,7 +33,6 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
     private Game activeGame; // The current game subject
     private char currentDifficulty;
     private Viewable controllerFacade; // Use Viewable to invoke use cases
-    private JLabel errorLabel;
 
     private JLabel statusLabel;
     private JButton verifyButton;
@@ -60,15 +59,9 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
 
         // Top panel with status and error labels
         JPanel topPanel = new JPanel(new FlowLayout());
-        errorLabel = new JLabel("Errors: 0");
-        errorLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        errorLabel.setForeground(Color.RED);
-
         statusLabel = new JLabel("Status: Ready");
         statusLabel.setFont(new Font("Arial", Font.BOLD, 14));
 
-        topPanel.add(errorLabel);
-        topPanel.add(Box.createHorizontalStrut(20));
         topPanel.add(statusLabel);
         add(topPanel, BorderLayout.NORTH);
 
@@ -260,8 +253,8 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
         if (currentBoard == null)
             return;
 
-        // Save initial state for undo
-        saveBoardState();
+        if (currentBoard == null)
+            return;
 
         for (int r = 0; r < SIZE; r++) {
             for (int c = 0; c < SIZE; c++) {
@@ -588,7 +581,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
     }
 
     private void undoMove() {
-        if (boardHistory.size() <= 1) {
+        if (boardHistory.isEmpty()) {
             JOptionPane.showMessageDialog(this,
                     "No moves to undo.",
                     "Undo",
@@ -599,22 +592,21 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
         try {
             if (controllerFacade instanceof ControllerFacade) {
                 ControllerFacade facade = (ControllerFacade) controllerFacade;
-                UserAction action = facade.getControllerA().undoLastMove();
-
-                // Restore previous board state
-                boardHistory.pop(); // Remove current state
-                currentBoard = boardHistory.peek(); // Get previous state
-
-                // Update activeGame reference if it exists
-                if (activeGame != null) {
-                    activeGame.setBoard(currentBoard);
-                }
-
-                // Reload GUI
-                loadGameIntoGUI();
-
-                statusLabel.setText("Status: Undo performed");
+                facade.getControllerA().undoLastMove();
             }
+
+            // Restore previous board state
+            currentBoard = boardHistory.pop();
+
+            // Update activeGame reference if it exists
+            if (activeGame != null) {
+                activeGame.setBoard(currentBoard);
+            }
+
+            // Reload GUI
+            loadGameIntoGUI();
+
+            statusLabel.setText("Status: Undo performed");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                     "Error undoing move: " + e.getMessage(),

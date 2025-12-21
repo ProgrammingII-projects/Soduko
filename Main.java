@@ -11,14 +11,14 @@ public class Main {
         SwingUtilities.invokeLater(() -> {
             // Create ControllerFacade (implements Viewable interface)
             ControllerFacade controllerFacade = new ControllerFacade();
-            
+
             // Create GUI (View layer) - implements Controllable interface
             // View uses Viewable to invoke use cases
             SudokuGameGUI gui = new SudokuGameGUI(controllerFacade);
-            
+
             // Set view reference in facade so controllers can update view
             controllerFacade.setView(gui);
-            
+
             gui.setVisible(true);
         });
     }
