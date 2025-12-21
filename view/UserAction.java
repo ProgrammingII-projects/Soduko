@@ -1,10 +1,6 @@
 package view;
 
-/**
- * UserAction class representing user actions in the view layer
- * Used only in view layer
- * Encapsulation: Encapsulates user action data
- */
+
 public class UserAction {
     private final int x;
     private final int y;
@@ -34,18 +30,14 @@ public class UserAction {
         return previousValue;
     }
     
-    /**
-     * Convert to log string format: (x, y, val, prev)
-     */
+    
     public String toLogString() {
         return String.format("(%d, %d, %d, %d)", x, y, value, previousValue);
     }
     
-    /**
-     * Parse from log string format: (x, y, val, prev)
-     */
+    
     public static UserAction fromLogString(String logLine) {
-        // Remove parentheses and split by comma
+        
         String cleaned = logLine.trim().replace("(", "").replace(")", "");
         String[] parts = cleaned.split(",");
         if (parts.length != 4) {
