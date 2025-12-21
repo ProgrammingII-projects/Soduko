@@ -20,8 +20,8 @@ public class GameStorage {
     private static final String CURRENT_FOLDER = "current";
     private static final String INCOMPLETE_FOLDER = "incomplete";
     private static final String GAME_FILE_PREFIX = "game_";
-    private static final String GAME_FILE_EXTENSION = ".txt";
-    private static final String LOG_FILE_NAME = "game_log.txt";
+    private static final String GAME_FILE_EXTENSION = ".csv";
+    private static final String LOG_FILE_NAME = "game_log.csv";
 
     private final String basePath;
 
