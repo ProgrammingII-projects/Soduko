@@ -17,22 +17,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Stack;
 
-/**
- * Sudoku Game GUI - Presentation Layer
- * MVC Pattern: View layer
- * Implements Controllable interface (view facade) - signals user actions
- * Uses Viewable interface (controller facade) - invokes use cases
- * Encapsulation: Encapsulates GUI presentation logic
- */
+
 public class SudokuGameGUI extends JFrame implements Controllable, GameStateObserver {
     private static final int SIZE = 9;
     private JButton[][] cells = new JButton[SIZE][SIZE];
     private JButton[] numberButtons = new JButton[9];
     private JButton selectedCell = null;
     private int[][] currentBoard;
-    private Game activeGame; // The current game subject
+    private Game activeGame; 
     private char currentDifficulty;
-    private Viewable controllerFacade; // Use Viewable to invoke use cases
+    private Viewable controllerFacade; 
 
     private JLabel statusLabel;
     private JButton verifyButton;
@@ -42,7 +36,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
     private boolean[][] isCorrect = new boolean[SIZE][SIZE];
     private javax.swing.border.Border[][] originalBorders = new javax.swing.border.Border[SIZE][SIZE];
 
-    // Memento Pattern: Store previous board states for undo
+    
     private Stack<int[][]> boardHistory = new Stack<>();
 
     public SudokuGameGUI(Viewable controllerFacade) {
@@ -57,7 +51,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
         setSize(750, 900);
         setLayout(new BorderLayout());
 
-        // Top panel with status and error labels
+        
         JPanel topPanel = new JPanel(new FlowLayout());
         statusLabel = new JLabel("Status: Ready");
         statusLabel.setFont(new Font("Arial", Font.BOLD, 14));
@@ -65,12 +59,12 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
         topPanel.add(statusLabel);
         add(topPanel, BorderLayout.NORTH);
 
-        // Grid panel
+        
         JPanel gridPanel = new JPanel(new GridLayout(9, 9, 1, 1));
         gridPanel.setBorder(new LineBorder(Color.BLACK, 3));
         add(gridPanel, BorderLayout.CENTER);
 
-        // Initialize cells
+        
         for (int r = 0; r < SIZE; r++) {
             for (int c = 0; c < SIZE; c++) {
                 JButton cell = new JButton();
@@ -97,7 +91,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
             }
         }
 
-        // Number buttons panel
+        
         JPanel numberPanel = new JPanel(new GridLayout(1, 9, 5, 5));
         numberPanel.setBorder(BorderFactory.createTitledBorder("Select Number"));
         for (int i = 0; i < 9; i++) {
@@ -113,7 +107,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
         }
         add(numberPanel, BorderLayout.SOUTH);
 
-        // Control buttons panel
+        
         JPanel controlPanel = new JPanel(new GridLayout(3, 1, 5, 5));
         controlPanel.setBorder(BorderFactory.createTitledBorder("Actions"));
 
@@ -121,7 +115,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
         verifyButton.addActionListener(e -> verifyGame());
 
         solveButton = new JButton("Solve");
-        solveButton.setEnabled(false); // Disabled until 5 empty cells
+        solveButton.setEnabled(false); 
         solveButton.addActionListener(e -> solveGame());
 
         undoButton = new JButton("Undo");
@@ -135,19 +129,17 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
         setLocationRelativeTo(null);
     }
 
-    /**
-     * Load game based on catalog
-     */
+    
     private void loadGame() {
         Catalog catalog = controllerFacade.getCatalog();
 
         if (catalog.hasCurrent()) {
-            // Load unfinished game
+            
             try {
                 if (controllerFacade instanceof ControllerFacade) {
                     ControllerFacade facade = (ControllerFacade) controllerFacade;
                     Game currentGame = facade.getControllerA().loadCurrentGame();
-                    // Register as observer
+                    
                     this.activeGame = currentGame;
                     this.activeGame.addObserver(this);
 
@@ -160,7 +152,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
                         "Error", JOptionPane.ERROR_MESSAGE);
             }
         } else if (catalog.hasAllModesExist()) {
-            // Ask user for difficulty
+            
             String[] options = { "Easy", "Medium", "Hard" };
             int choice = JOptionPane.showOptionDialog(this,
                     "Select difficulty level:",
@@ -177,7 +169,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
                 DifficultyEnum difficulty = DifficultyEnum.fromChar(currentDifficulty);
                 try {
                     Game game = controllerFacade.getGame(difficulty);
-                    // Register as observer
+                    
                     this.activeGame = game;
                     this.activeGame.addObserver(this);
 
@@ -190,14 +182,12 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
                 }
             }
         } else {
-            // Ask for solved Sudoku file
+            
             askForSolvedSudokuFile();
         }
     }
 
-    /**
-     * Ask user for solved Sudoku file path
-     */
+    
     private void askForSolvedSudokuFile() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Select Solved Sudoku File");
@@ -208,7 +198,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
             try {
                 driveGames(file.getAbsolutePath());
 
-                // Now ask for difficulty
+                
                 String[] options = { "Easy", "Medium", "Hard" };
                 int choice = JOptionPane.showOptionDialog(this,
                         "Games generated! Select difficulty level:",
@@ -225,7 +215,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
                     DifficultyEnum difficulty = DifficultyEnum.fromChar(currentDifficulty);
                     try {
                         Game game = controllerFacade.getGame(difficulty);
-                        // Register as observer
+                        
                         this.activeGame = game;
                         this.activeGame.addObserver(this);
 
@@ -246,9 +236,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
         }
     }
 
-    /**
-     * Load game board into GUI
-     */
+    
     private void loadGameIntoGUI() {
         if (currentBoard == null)
             return;
@@ -276,17 +264,13 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
         updateSolveButtonState();
     }
 
-    /**
-     * Update solve button state based on empty cell count
-     */
+    
     private void updateSolveButtonState() {
         int emptyCount = countEmptyCells();
         solveButton.setEnabled(emptyCount == 5);
     }
 
-    /**
-     * Count empty cells
-     */
+    
     private int countEmptyCells() {
         if (currentBoard == null)
             return 0;
@@ -300,9 +284,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
         return count;
     }
 
-    /**
-     * Save current board state for undo (Memento Pattern)
-     */
+    
     private void saveBoardState() {
         if (currentBoard == null)
             return;
@@ -313,7 +295,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
         boardHistory.push(copy);
     }
 
-    // Controllable interface implementation
+    
 
     @Override
     public boolean[] getCatalog() {
@@ -344,7 +326,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
         int size = game.length;
         boolean[][] cellValidity = new boolean[size][size];
 
-        // Initialize all to true (assuming valid)
+        
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 cellValidity[i][j] = true;
@@ -352,7 +334,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
         }
 
         if (result.startsWith("invalid")) {
-            // Parse invalid positions
+            
             String[] parts = result.split(" ");
             for (int i = 1; i < parts.length; i++) {
                 String[] coords = parts[i].split(",");
@@ -374,7 +356,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
         Game gameObj = new Game(game);
         int[] solution = controllerFacade.solveGame(gameObj);
 
-        // Find empty cell positions
+        
         java.util.List<int[]> emptyCells = new java.util.ArrayList<>();
         for (int row = 0; row < game.length; row++) {
             for (int col = 0; col < game[row].length; col++) {
@@ -384,12 +366,12 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
             }
         }
 
-        // Return [x, y, solution] for each missing cell
+        
         int[][] result = new int[emptyCells.size()][3];
         for (int i = 0; i < emptyCells.size(); i++) {
-            result[i][0] = emptyCells.get(i)[0]; // x
-            result[i][1] = emptyCells.get(i)[1]; // y
-            result[i][2] = solution[i]; // solution
+            result[i][0] = emptyCells.get(i)[0]; 
+            result[i][1] = emptyCells.get(i)[1]; 
+            result[i][2] = solution[i]; 
         }
 
         return result;
@@ -450,23 +432,23 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
             return;
         }
 
-        // Save state before change
+        
         int previousValue = currentBoard[row][col];
         saveBoardState();
 
-        // Update board via Game Subject
-        // selectedCell.setText(String.valueOf(number)); // Removed direct update
-        // currentBoard[row][col] = number; // Removed direct update
+        
+        
+        
 
         if (activeGame != null) {
-            activeGame.setValue(row, col, number); // This will trigger notification
+            activeGame.setValue(row, col, number); 
         } else {
-            // Fallback if activeGame is lost (shouldn't happen)
+            
             currentBoard[row][col] = number;
             cells[row][col].setText(String.valueOf(number));
         }
 
-        // Log user action
+        
         try {
             UserAction action = new UserAction(row, col, number, previousValue);
             logUserAction(action);
@@ -474,7 +456,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
             System.err.println("Error logging action: " + e.getMessage());
         }
 
-        // Save current game
+        
         try {
             if (controllerFacade instanceof ControllerFacade) {
                 ControllerFacade facade = (ControllerFacade) controllerFacade;
@@ -496,7 +478,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
 
         boolean[][] cellValidity = verifyGame(currentBoard);
 
-        // Check if any cells are invalid
+        
         boolean hasInvalid = false;
         for (int r = 0; r < SIZE; r++) {
             for (int c = 0; c < SIZE; c++) {
@@ -519,7 +501,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
                         "Congratulations! Puzzle solved correctly!",
                         "Success",
                         JOptionPane.INFORMATION_MESSAGE);
-                // Delete game if complete and valid
+                
                 try {
                     if (controllerFacade instanceof ControllerFacade) {
                         ControllerFacade facade = (ControllerFacade) controllerFacade;
@@ -555,7 +537,7 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
         try {
             int[][] solution = solveGame(currentBoard);
 
-            // Apply solution
+            
             for (int[] sol : solution) {
                 int row = sol[0];
                 int col = sol[1];
@@ -564,12 +546,12 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
                 if (row >= 0 && row < SIZE && col >= 0 && col < SIZE) {
                     currentBoard[row][col] = value;
                     cells[row][col].setText(String.valueOf(value));
-                    cells[row][col].setBackground(new Color(144, 238, 144)); // Light green
+                    cells[row][col].setBackground(new Color(144, 238, 144)); 
                     isCorrect[row][col] = true;
                 }
             }
 
-            // Verify the solved board
+            
             verifyGame();
 
         } catch (InvalidGameException e) {
@@ -595,15 +577,15 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
                 facade.getControllerA().undoLastMove();
             }
 
-            // Restore previous board state
+            
             currentBoard = boardHistory.pop();
 
-            // Update activeGame reference if it exists
+            
             if (activeGame != null) {
                 activeGame.setBoard(currentBoard);
             }
 
-            // Reload GUI
+            
             loadGameIntoGUI();
 
             statusLabel.setText("Status: Undo performed");
@@ -627,10 +609,10 @@ public class SudokuGameGUI extends JFrame implements Controllable, GameStateObse
 
                     if (row >= 0 && row < SIZE && col >= 0 && col < SIZE) {
                         cells[row][col].setText(value == 0 ? "" : String.valueOf(value));
-                        // Use original border or special highlight for updates if needed
+                        
                         if (!cells[row][col].getBackground().equals(Color.RED) &&
                                 !cells[row][col].getBackground().equals(new Color(144, 238, 144))) {
-                            cells[row][col].setBackground(new Color(240, 248, 255)); // Alice Blue for updates
+                            cells[row][col].setBackground(new Color(240, 248, 255)); 
                         }
                     }
                 }

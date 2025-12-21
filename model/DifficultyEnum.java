@@ -1,12 +1,10 @@
 package model;
 
-/**
- * Enumeration representing difficulty levels for Sudoku games
- */
+
 public enum DifficultyEnum {
-    EASY(10),      // Remove 10 cells
-    MEDIUM(20),    // Remove 20 cells
-    HARD(25);      // Remove 25 cells
+    EASY(10),      
+    MEDIUM(20),    
+    HARD(25);      
     
     private final int cellsToRemove;
     
@@ -18,9 +16,7 @@ public enum DifficultyEnum {
         return cellsToRemove;
     }
     
-    /**
-     * Convert char to DifficultyEnum
-     */
+    
     public static DifficultyEnum fromChar(char c) {
         switch (Character.toLowerCase(c)) {
             case 'e': return EASY;
@@ -30,9 +26,7 @@ public enum DifficultyEnum {
         }
     }
     
-    /**
-     * Convert DifficultyEnum to char
-     */
+    
     public char toChar() {
         switch (this) {
             case EASY: return 'e';

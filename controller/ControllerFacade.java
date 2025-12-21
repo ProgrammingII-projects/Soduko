@@ -11,49 +11,35 @@ import exceptions.SolutionInvalidException;
 import view.UserAction;
 import java.io.IOException;
 
-/**
- * ControllerFacade: Adapter/Facade between Viewable and Controllable interfaces
- * MVC Pattern: Controller Facade - implements Viewable, delegates to ControllerA and ControllerB
- * Facade Pattern: Provides simplified interface to complex subsystems
- * Adapter Pattern: Adapts Viewable interface to Controllable interface
- * Uses Controllable interface to update view (ControllerA and ControllerB can update view)
- * Encapsulation: Encapsulates coordination between controllers
- */
+
 public class ControllerFacade implements Viewable {
-    private final ControllerA controllerA; // Game management
-    private final ControllerB controllerB; // Verification and solving
-    private Controllable view; // View reference for updates
+    private final ControllerA controllerA; 
+    private final ControllerB controllerB; 
+    private Controllable view; 
     
     public ControllerFacade() {
         this.controllerA = new ControllerA();
         this.controllerB = new ControllerB();
     }
     
-    /**
-     * Set the view reference
-     * Observer Pattern: Allows controllers to update view
-     */
+    
     public void setView(Controllable view) {
         this.view = view;
         this.controllerA.setView(view);
         this.controllerB.setView(view);
     }
     
-    /**
-     * Get ControllerA instance (for direct access if needed)
-     */
+    
     public ControllerA getControllerA() {
         return controllerA;
     }
     
-    /**
-     * Get ControllerB instance (for direct access if needed)
-     */
+    
     public ControllerB getControllerB() {
         return controllerB;
     }
     
-    // Viewable interface implementation - delegates to ControllerA and ControllerB
+    
     
     @Override
     public Catalog getCatalog() {
@@ -85,31 +71,25 @@ public class ControllerFacade implements Viewable {
         controllerA.logUserAction(userAction);
     }
     
-    // Additional methods for Controllable interface adaptation
     
-    /**
-     * Adapt getCatalog() to boolean array format
-     */
+    
+    
     public boolean[] getCatalogAsBooleanArray() {
         Catalog catalog = getCatalog();
         return new boolean[]{catalog.hasCurrent(), catalog.hasAllModesExist()};
     }
     
-    /**
-     * Adapt getGame() to int[][] format
-     */
+    
     public int[][] getGameAsIntArray(char level) throws NotFoundException {
         DifficultyEnum difficulty = DifficultyEnum.fromChar(level);
         Game game = getGame(difficulty);
         return game.getBoard();
     }
     
-    /**
-     * Adapt driveGames() to accept file path
-     */
+    
     public void driveGamesFromPath(String sourcePath) throws SolutionInvalidException {
         try {
-            // Load game from file
+            
             Game sourceGame = loadGameFromFile(sourcePath);
             driveGames(sourceGame);
         } catch (IOException e) {
@@ -117,9 +97,7 @@ public class ControllerFacade implements Viewable {
         }
     }
     
-    /**
-     * Adapt verifyGame() to return boolean[][]
-     */
+    
     public boolean[][] verifyGameAsBooleanArray(int[][] game) {
         Game gameObj = new Game(game);
         String result = verifyGame(gameObj);
@@ -127,7 +105,7 @@ public class ControllerFacade implements Viewable {
         int size = game.length;
         boolean[][] cellValidity = new boolean[size][size];
         
-        // Initialize all to true (assuming valid)
+        
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 cellValidity[i][j] = true;
@@ -135,7 +113,7 @@ public class ControllerFacade implements Viewable {
         }
         
         if (result.startsWith("invalid")) {
-            // Parse invalid positions
+            
             String[] parts = result.split(" ");
             for (int i = 1; i < parts.length; i++) {
                 String[] coords = parts[i].split(",");
@@ -152,14 +130,12 @@ public class ControllerFacade implements Viewable {
         return cellValidity;
     }
     
-    /**
-     * Adapt solveGame() to return int[][]
-     */
+    
     public int[][] solveGameAsIntArray(int[][] game) throws InvalidGameException {
         Game gameObj = new Game(game);
         int[] solution = solveGame(gameObj);
         
-        // Find empty cell positions
+        
         java.util.List<int[]> emptyCells = new java.util.ArrayList<>();
         for (int row = 0; row < game.length; row++) {
             for (int col = 0; col < game[row].length; col++) {
@@ -169,27 +145,23 @@ public class ControllerFacade implements Viewable {
             }
         }
         
-        // Return [x, y, solution] for each missing cell
+        
         int[][] result = new int[emptyCells.size()][3];
         for (int i = 0; i < emptyCells.size(); i++) {
-            result[i][0] = emptyCells.get(i)[0]; // x
-            result[i][1] = emptyCells.get(i)[1]; // y
-            result[i][2] = solution[i];          // solution
+            result[i][0] = emptyCells.get(i)[0]; 
+            result[i][1] = emptyCells.get(i)[1]; 
+            result[i][2] = solution[i];          
         }
         
         return result;
     }
     
-    /**
-     * Adapt logUserAction() to accept UserAction
-     */
+    
     public void logUserActionFromView(UserAction userAction) throws IOException {
         logUserAction(userAction.toLogString());
     }
     
-    /**
-     * Load game from file path
-     */
+    
     private Game loadGameFromFile(String filePath) throws IOException {
         java.util.List<int[]> rows = new java.util.ArrayList<>();
         try (java.io.BufferedReader reader = new java.io.BufferedReader(

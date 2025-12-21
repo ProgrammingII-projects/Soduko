@@ -3,18 +3,14 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Represents a Sudoku game with its board state
- * Used only in controller layer
- * IMPORTANT: Uses reference to board, not a copy
- */
+
 public class Game {
     private int[][] board;
     private List<GameStateObserver> observers = new ArrayList<>();
 
     public Game(int[][] board) {
-        // IMPORTANT: DON'T COPY THE BOARD BY VALUE
-        // USE REFERENCES
+        
+        
         this.board = board;
     }
 
@@ -41,38 +37,22 @@ public class Game {
         }
     }
 
-    /**
-     * Gets the board reference
-     * 
-     * @return Reference to the board array
-     */
+    
     public int[][] getBoard() {
         return board;
     }
 
-    /**
-     * Sets the board reference
-     * 
-     * @param board The board to reference
-     */
+    
     public void setBoard(int[][] board) {
         this.board = board;
     }
 
-    /**
-     * Gets the size of the board
-     * 
-     * @return Board size (typically 9)
-     */
+    
     public int getSize() {
         return board != null ? board.length : 0;
     }
 
-    /**
-     * Checks if the board is complete (no zeros)
-     * 
-     * @return true if complete, false otherwise
-     */
+    
     public boolean isComplete() {
         if (board == null)
             return false;
@@ -86,11 +66,7 @@ public class Game {
         return true;
     }
 
-    /**
-     * Counts the number of empty cells (zeros)
-     * 
-     * @return Number of empty cells
-     */
+    
     public int countEmptyCells() {
         if (board == null)
             return 0;

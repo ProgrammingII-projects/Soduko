@@ -6,12 +6,7 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 
-/**
- * Storage system for Sudoku games
- * Manages folders: easy, medium, hard, and current
- * Singleton Pattern: Single storage instance
- * Encapsulation: Encapsulates file system operations
- */
+
 public class GameStorage {
     private static GameStorage instance;
     private static final String EASY_FOLDER = "easy";
@@ -37,9 +32,7 @@ public class GameStorage {
         return instance;
     }
 
-    /**
-     * Initialize all required folders
-     */
+    
     private void initializeFolders() {
         try {
             Files.createDirectories(Paths.get(basePath, EASY_FOLDER));
@@ -52,9 +45,7 @@ public class GameStorage {
         }
     }
 
-    /**
-     * Save a game to a difficulty folder
-     */
+    
     public void saveGame(DifficultyEnum difficulty, Game game) throws IOException {
         String folder = getFolderName(difficulty);
         String filename = GAME_FILE_PREFIX + System.currentTimeMillis() + GAME_FILE_EXTENSION;
@@ -62,21 +53,17 @@ public class GameStorage {
         saveGameToFile(filePath, game);
     }
 
-    /**
-     * Save the current game being played
-     */
+    
     public void saveCurrentGame(Game game) throws IOException {
         Path filePath = Paths.get(basePath, CURRENT_FOLDER, "current_game" + GAME_FILE_EXTENSION);
         saveGameToFile(filePath, game);
 
-        // Also save to incomplete folder
+        
         Path incompleteGamePath = Paths.get(basePath, INCOMPLETE_FOLDER, "current_game" + GAME_FILE_EXTENSION);
         saveGameToFile(incompleteGamePath, game);
     }
 
-    /**
-     * Load a random game from a difficulty folder
-     */
+    
     public Game loadRandomGame(DifficultyEnum difficulty) throws IOException, exceptions.NotFoundException {
         String folder = getFolderName(difficulty);
         Path folderPath = Paths.get(basePath, folder);
@@ -97,15 +84,13 @@ public class GameStorage {
             throw new exceptions.NotFoundException("No games found for difficulty: " + difficulty);
         }
 
-        // Pick a random file
+        
         Random random = new Random();
         Path selectedFile = gameFiles.get(random.nextInt(gameFiles.size()));
         return loadGameFromFile(selectedFile);
     }
 
-    /**
-     * Load the current game if it exists
-     */
+    
     public Game loadCurrentGame() throws IOException, exceptions.NotFoundException {
         Path filePath = Paths.get(basePath, INCOMPLETE_FOLDER, "current_game" + GAME_FILE_EXTENSION);
         if (!Files.exists(filePath)) {
@@ -114,26 +99,20 @@ public class GameStorage {
         return loadGameFromFile(filePath);
     }
 
-    /**
-     * Check if current game exists
-     */
+    
     public boolean hasCurrentGame() {
         Path filePath = Paths.get(basePath, INCOMPLETE_FOLDER, "current_game" + GAME_FILE_EXTENSION);
         return Files.exists(filePath);
     }
 
-    /**
-     * Check if at least one game exists for each difficulty
-     */
+    
     public boolean hasAllDifficultyGames() {
         return hasGamesInFolder(EASY_FOLDER) &&
                 hasGamesInFolder(MEDIUM_FOLDER) &&
                 hasGamesInFolder(HARD_FOLDER);
     }
 
-    /**
-     * Delete a game from a difficulty folder
-     */
+    
     public void deleteGame(DifficultyEnum difficulty, Game game) throws IOException {
         String folder = getFolderName(difficulty);
         Path folderPath = Paths.get(basePath, folder);
@@ -150,9 +129,7 @@ public class GameStorage {
         }
     }
 
-    /**
-     * Delete the current game and log file
-     */
+    
     public void deleteCurrentGame() throws IOException {
         Path gamePath = Paths.get(basePath, INCOMPLETE_FOLDER, "current_game" + GAME_FILE_EXTENSION);
         Path logPath = Paths.get(basePath, INCOMPLETE_FOLDER, LOG_FILE_NAME);
@@ -164,16 +141,14 @@ public class GameStorage {
             Files.delete(logPath);
         }
 
-        // Also delete from current folder
+        
         Path currentPath = Paths.get(basePath, CURRENT_FOLDER, "current_game" + GAME_FILE_EXTENSION);
         if (Files.exists(currentPath)) {
             Files.delete(currentPath);
         }
     }
 
-    /**
-     * Append to log file
-     */
+    
     public void appendToLog(String logEntry) throws IOException {
         Path logPath = Paths.get(basePath, INCOMPLETE_FOLDER, LOG_FILE_NAME);
         try (BufferedWriter writer = Files.newBufferedWriter(logPath,
@@ -183,9 +158,7 @@ public class GameStorage {
         }
     }
 
-    /**
-     * Read all log entries
-     */
+    
     public List<String> readLogEntries() throws IOException {
         Path logPath = Paths.get(basePath, INCOMPLETE_FOLDER, LOG_FILE_NAME);
         if (!Files.exists(logPath)) {
@@ -205,9 +178,7 @@ public class GameStorage {
         return entries;
     }
 
-    /**
-     * Remove last log entry
-     */
+    
     public void removeLastLogEntry() throws IOException {
         List<String> entries = readLogEntries();
         if (entries.isEmpty()) {
@@ -226,9 +197,7 @@ public class GameStorage {
         }
     }
 
-    /**
-     * Save game board to file
-     */
+    
     private void saveGameToFile(Path filePath, Game game) throws IOException {
         try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(filePath))) {
             int[][] board = game.getBoard();
@@ -244,9 +213,7 @@ public class GameStorage {
         }
     }
 
-    /**
-     * Load game board from file
-     */
+    
     private Game loadGameFromFile(Path filePath) throws IOException {
         List<int[]> rows = new ArrayList<>();
         try (BufferedReader reader = Files.newBufferedReader(filePath)) {
@@ -265,9 +232,7 @@ public class GameStorage {
         return new Game(board);
     }
 
-    /**
-     * Check if folder has at least one game file
-     */
+    
     private boolean hasGamesInFolder(String folder) {
         Path folderPath = Paths.get(basePath, folder);
         if (!Files.exists(folderPath)) {
@@ -282,9 +247,7 @@ public class GameStorage {
         }
     }
 
-    /**
-     * Get folder name for difficulty
-     */
+    
     private String getFolderName(DifficultyEnum difficulty) {
         switch (difficulty) {
             case EASY:

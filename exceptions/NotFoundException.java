@@ -1,8 +1,6 @@
 package exceptions;
 
-/**
- * Exception thrown when a requested game is not found
- */
+
 public class NotFoundException extends Exception {
     public NotFoundException(String message) {
         super(message);
